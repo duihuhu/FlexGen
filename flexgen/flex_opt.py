@@ -344,7 +344,7 @@ class SelfAttention:
     def init_prefill_cache_one_gpu_batch(self, cache_home):
         device = self.env.cpu
         cache = device.init_prefill_cache_one_gpu_batch(self.config, self.task, self.policy)
-        print("cpu cache: ", cache[0].data)
+        # print("cpu cache: ", cache[0].data)
         cache_home.store(cache)
         
 
