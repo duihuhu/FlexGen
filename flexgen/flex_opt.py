@@ -434,6 +434,7 @@ class SelfAttention:
                        slice(0, k_new.shape[1]))
 
         if i == 0:
+            print("general_copy", k_pre_home.device.device_type, k_new.device.device_type)
             general_copy(k_pre_home, indices, k_new, None)
             general_copy(v_pre_home, indices, v_new, None)
         general_copy(k_home, indices, k_new, None)
