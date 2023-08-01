@@ -960,8 +960,6 @@ class OptLM:
 
             for j in range(self.num_layers):
                 if i > 0: 
-                    localtime = time.asctime(time.localtime(time.time()))
-                    print("decoding_gpu_batch start: " , localtime)
                     timers("decoding_gpu_batch").start()
 
                 load_weight_timer.start(self.sync)
@@ -983,8 +981,6 @@ class OptLM:
                     store_cache_timer.stop(self.sync)
 
                 if i > 0:
-                    localtime = time.asctime(time.localtime(time.time()))
-                    print("decoding_gpu_batch stop: " , localtime)
                     timers("decoding_gpu_batch").stop()
                     pbar.update(1)
                     batch_ct += 1
