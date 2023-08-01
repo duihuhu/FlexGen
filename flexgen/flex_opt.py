@@ -900,8 +900,8 @@ class OptLM:
             for k in range(num_gpu_batches):
                 self.init_cache(j, k)
                 self.init_prefill_cache(j, k)
-                print(type(self.prefill_cache_home[j][k].val.data))
-                print(type(self.cache_home[j][k].val.data))
+                print(type(self.cache_home[j][k].val))
+                print(type(self.prefill_cache_home[j][k].val))
         if self.policy.cpu_cache_compute:
             self.env.cpu.init_attention_compute_workspace(self.config, self.task, self.policy)
 
