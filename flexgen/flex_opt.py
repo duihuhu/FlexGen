@@ -174,7 +174,7 @@ class InputEmbed:
     def load_cache(self, cache_home, cache_read_buf, i):
         pass  # do nothing
 
-    def store_cache(self, cache_home, cache_write_buf, i):
+    def store_cache(self, cache_home, cache_write_buf, i, prefill_cache_home=None):
         pass  # do nothing
 
     def input_act_shape_and_dtype(self, batch_size, seq_len):
@@ -245,7 +245,7 @@ class OutputEmbed:
     def load_cache(self, cache_home, cache_read_buf, i):
         pass  # do nothing
 
-    def store_cache(self, cache_home, cache_write_buf, i):
+    def store_cache(self, cache_home, cache_write_buf, i, prefill_cache_home=None):
         pass  # do nothing
 
     def input_act_shape_and_dtype(self, batch_size, seq_len):
@@ -415,11 +415,10 @@ class SelfAttention:
         else:
             raise ValueError(f"Invalid path: {path}")
 
-    def store_cache(self, cache_home, cache_write_buf, i):
+    def store_cache(self, cache_home, cache_write_buf, i, prefill_cache_home=None):
         # shape: (s, b * n_head, head_dim)
         k_home, v_home = cache_home.val
         k_new, v_new = cache_write_buf.pop()
-        print(k_new)
 
         if i == self.task.gen_len - 1:  # last token, no need to store cache
             return
@@ -527,7 +526,7 @@ class MLP:
     def load_cache(self, cache_home, cache_read_buf, i):
         pass  # do nothing
 
-    def store_cache(self, cache_home, cache_write_buf, i):
+    def store_cache(self, cache_home, cache_write_buf, i, prefill_cache_home=None):
         pass  # do nothing
 
     def input_act_shape_and_dtype(self, batch_size, seq_len):
@@ -586,7 +585,7 @@ class TransformerLayer:
         self.attention.load_cache(cache_home, cache_read_buf, i)
 
     def store_cache(self, cache_home, cache_write_buf, i):
-        self.attention.store_cache(cache_home, cache_write_buf, i)
+        self.attention.store_cache(cache_home, cache_write_buf, i, prefill_cache_home=None)
 
     def forward(self, hidden, cache_read_buf, weight_read_buf, attention_mask,
                 cache_write_buf, i, k):
@@ -742,9 +741,9 @@ class OptLM:
         # Delete cache_write_buf
         if overlap:
             with torch.cuda.stream(self.store_cache_stream):
-                self.layers[j].store_cache(self.cache_home[j][k], self.cache_write_buf[j][k], i)
+                self.layers[j].store_cache(self.cache_home[j][k], self.cache_write_buf[j][k], i, self.prefill_cache_home[j][k])
         else:
-            self.layers[j].store_cache(self.cache_home[j][k], self.cache_write_buf[j][k], i)
+            self.layers[j].store_cache(self.cache_home[j][k], self.cache_write_buf[j][k], i, self.prefill_cache_home[j][k])
 
     def delete_cache(self, j, k):
         v = self.cache_home[j][k].pop()
