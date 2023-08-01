@@ -944,11 +944,16 @@ class OptLM:
 
         for i in range(self.execute_gen_len):
             if i == 0:
+                localtime = time.asctime(time.localtime(time.time()))
+                print("prefill_start: " , localtime)
                 timers("prefill_total").start()
                 load_cache_timer = timers("load_cache_prefill")
                 store_cache_timer = timers("store_cache_prefill")
                 compute_layer_timer = timers("compute_layer_prefill")
             else:
+                if i == 1:
+                    localtime = time.asctime(time.localtime(time.time()))
+                    print("decoding_gpu_batch start: " , localtime)
                 load_cache_timer = timers("load_cache_decoding")
                 store_cache_timer = timers("store_cache_decoding")
                 compute_layer_timer = timers("compute_layer_decoding")
