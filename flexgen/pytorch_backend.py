@@ -193,7 +193,7 @@ class TorchDevice:
     def allocate_prefill(self, shape, dtype, pin_memory=None, name=None):
         dtype = np_dtype_to_torch_dtype[dtype]
         data = torch.empty(shape, dtype=dtype, pin_memory=pin_memory, device=torch.device("cpu"))
-        return TorchTensor.create_from_torch(data, self, name=name)
+        return TorchTensor.create_from_torch(data, self, name="cpu")
 
     def delete(self, tensor):
         pass
