@@ -190,6 +190,11 @@ class TorchDevice:
         data = torch.empty(shape, dtype=dtype, pin_memory=pin_memory, device=self.dev)
         return TorchTensor.create_from_torch(data, self, name=name)
 
+    def allocate_prefill(self, shape, dtype, pin_memory=None, name=None):
+        dtype = np_dtype_to_torch_dtype[dtype]
+        data = torch.empty(shape, dtype=dtype, pin_memory=pin_memory, device=self.dev)
+        return TorchTensor.create_from_torch(data, self, name=name)
+
     def delete(self, tensor):
         pass
 
@@ -295,6 +300,17 @@ class TorchDevice:
         v_cache = self.allocate(shape, np.float16, pin_memory=pin_memory)
         return k_cache, v_cache
 
+    def init_prefill_cache_one_gpu_batch(self, config, task, policy):
+        num_head, hidden_size, prompt_len, gen_len, gpu_batch_size = (
+            config.n_head, config.input_dim, task.prompt_len, task.gen_len,
+            policy.gpu_batch_size)
+        shape = (prompt_len + gen_len - 1, gpu_batch_size * num_head, hidden_size // num_head)
+        # NOTE: disable pin_memory due to high memory overhead
+        pin_memory = True
+        k_cache = self.allocate_prefill(shape, np.float16, pin_memory=pin_memory)
+        v_cache = self.allocate_prefill(shape, np.float16, pin_memory=pin_memory)
+        return k_cache, v_cache
+    
     def mha(self, inputs, attention_mask, w_q, b_q, w_k, b_k, w_v, b_v,
             w_out, b_out, w_ln, b_ln, n_head, donate, compress_cache, comp_config):
         """Multi-head attention (prefill phase)."""

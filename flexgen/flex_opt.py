@@ -168,6 +168,9 @@ class InputEmbed:
     def init_cache_one_gpu_batch(self, cache_home):
         pass  # do nothing
 
+    def init_prefill_cache_one_gpu_batch(self, cache_home):
+        pass  # do nothing
+
     def load_cache(self, cache_home, cache_read_buf, i):
         pass  # do nothing
 
@@ -234,6 +237,9 @@ class OutputEmbed:
                 w_token.smart_copy(dst1)))
 
     def init_cache_one_gpu_batch(self, cache_home):
+        pass  # do nothing
+
+    def init_prefill_cache_one_gpu_batch(self, cache_home):
         pass  # do nothing
 
     def load_cache(self, cache_home, cache_read_buf, i):
@@ -333,6 +339,12 @@ class SelfAttention:
             device = device.compressed_device
         cache = device.init_cache_one_gpu_batch(self.config, self.task, self.policy)
         cache_home.store(cache)
+        
+    def init_prefill_cache_one_gpu_batch(self, cache_home):
+        device = self.env.cpu
+        cache = device.init_prefill_cache_one_gpu_batch(self.config, self.task, self.policy)
+        cache_home.store(cache)
+        
 
     def load_cache(self, cache_home, cache_read_buf, i):
         if i == 0:  # prefill, no cache
@@ -506,6 +518,9 @@ class MLP:
     def init_cache_one_gpu_batch(self, cache_home):
         pass  # do nothing
 
+    def init_prefill_cache_one_gpu_batch(self, cache_home):
+        pass  # do nothing
+
     def load_cache(self, cache_home, cache_read_buf, i):
         pass  # do nothing
 
@@ -559,6 +574,10 @@ class TransformerLayer:
 
     def init_cache_one_gpu_batch(self, cache_home):
         self.attention.init_cache_one_gpu_batch(cache_home)
+        
+    def init_prefill_cache_one_gpu_batch(self, cache_home):
+        pass  # do nothing
+
 
     def load_cache(self, cache_home, cache_read_buf, i):
         self.attention.load_cache(cache_home, cache_read_buf, i)
@@ -623,6 +642,9 @@ class OptLM:
         # for the i-th token, j-th layer, k-th gpu batch.
         num_layers, num_gpu_batches = self.num_layers, self.policy.num_gpu_batches
 
+        # to save the prefill stage's kv cache
+        self.prefill_cache_home = array_2d(num_layers, num_gpu_batches, ValueHolder)
+        
         # cache[j][k]
         self.cache_home = array_2d(num_layers, num_gpu_batches, ValueHolder)
         self.cache_read_buf = array_2d(num_layers, num_gpu_batches, ValueHolder)
@@ -675,6 +697,9 @@ class OptLM:
 
     def init_cache(self, j, k):
         self.layers[j].init_cache_one_gpu_batch(self.cache_home[j][k])
+
+    def init_prefill_cache(self, j, k):
+            self.layers[j].init_prefill_cache_one_gpu_batch(self.prefill_cache_home[j][k])
 
     def load_cache(self, i, j, k, overlap=True):
         # Handle corner cases
@@ -859,6 +884,7 @@ class OptLM:
         num_layers, num_gpu_batches = self.num_layers, self.policy.num_gpu_batches
         for j in range(num_layers):
             for k in range(num_gpu_batches):
+                self.prefill_cache_home[j][k].clear()
                 self.cache_home[j][k].clear()
                 self.cache_read_buf[j][k].clear()
                 self.cache_write_buf[j][k].clear()
@@ -873,7 +899,7 @@ class OptLM:
         for j in range(num_layers):
             for k in range(num_gpu_batches):
                 self.init_cache(j, k)
-        print(self.policy.cpu_cache_compute)
+                self.init_prefill_cache(j, k)
         if self.policy.cpu_cache_compute:
             self.env.cpu.init_attention_compute_workspace(self.config, self.task, self.policy)
 
