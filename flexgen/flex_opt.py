@@ -951,9 +951,6 @@ class OptLM:
                 store_cache_timer = timers("store_cache_prefill")
                 compute_layer_timer = timers("compute_layer_prefill")
             else:
-                if i == 1:
-                    localtime = time.asctime(time.localtime(time.time()))
-                    print("decoding_gpu_batch start: " , localtime)
                 load_cache_timer = timers("load_cache_decoding")
                 store_cache_timer = timers("store_cache_decoding")
                 compute_layer_timer = timers("compute_layer_decoding")
@@ -962,7 +959,10 @@ class OptLM:
                 self.update_attention_mask(i, k)
 
             for j in range(self.num_layers):
-                if i > 0: timers("decoding_gpu_batch").start()
+                if i > 0: 
+                    localtime = time.asctime(time.localtime(time.time()))
+                    print("decoding_gpu_batch start: " , localtime)
+                    timers("decoding_gpu_batch").start()
 
                 load_weight_timer.start(self.sync)
                 for k in range(self.num_gpu_batches):
@@ -983,14 +983,14 @@ class OptLM:
                     store_cache_timer.stop(self.sync)
 
                 if i > 0:
+                    localtime = time.asctime(time.localtime(time.time()))
+                    print("decoding_gpu_batch stop: " , localtime)
                     timers("decoding_gpu_batch").stop()
                     pbar.update(1)
                     batch_ct += 1
                 if batch_ct >= execute_num_batches: break
             if batch_ct >= execute_num_batches: break
             if i == 0: timers("prefill_total").stop(self.sync)
-        localtime = time.asctime(time.localtime(time.time()))
-        print("decoding_gpu_batch stop: " , localtime)
         # Convert "decoding_gpu_batch" timer to "generate" timer
         batch_cost = np.mean(timers("decoding_gpu_batch").costs[10:])
         for i in range(self.execute_gen_len):
