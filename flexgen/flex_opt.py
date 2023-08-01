@@ -418,8 +418,8 @@ class SelfAttention:
     def store_cache(self, cache_home, cache_write_buf, i):
         # shape: (s, b * n_head, head_dim)
         k_home, v_home = cache_home.val
-        print(k_home)
         k_new, v_new = cache_write_buf.pop()
+        print(k_new)
 
         if i == self.task.gen_len - 1:  # last token, no need to store cache
             return
