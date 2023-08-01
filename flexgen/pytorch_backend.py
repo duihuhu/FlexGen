@@ -193,7 +193,6 @@ class TorchDevice:
     def allocate_prefill(self, shape, dtype, pin_memory=None, name=None):
         dtype = np_dtype_to_torch_dtype[dtype]
         data = torch.empty(shape, dtype=dtype, pin_memory=pin_memory, device=torch.device("cpu"))
-        print(data.device)
         return TorchTensor.create_from_torch(data, self, name="cpu")
 
     def delete(self, tensor):
@@ -813,6 +812,7 @@ def general_copy(dst: TorchTensor, dst_indices: Tuple[slice],
     >>> env.disk.synchronize()
     >>> torch.cuda.synchronize()
     """
+    print("general_copy", dst.device.device_type, src.device.device_type)
     if dst.device.device_type == DeviceType.MIXED:
         # The tensor is on mixed devices, do recursive calls
         assert src.device.device_type != DeviceType.MIXED

@@ -701,7 +701,7 @@ class OptLM:
         self.layers[j].init_cache_one_gpu_batch(self.cache_home[j][k])
 
     def init_prefill_cache(self, j, k):
-            self.layers[j].init_prefill_cache_one_gpu_batch(self.prefill_cache_home[j][k])
+        self.layers[j].init_prefill_cache_one_gpu_batch(self.prefill_cache_home[j][k])
 
     def load_cache(self, i, j, k, overlap=True):
         # Handle corner cases
