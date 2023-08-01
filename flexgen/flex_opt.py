@@ -989,7 +989,8 @@ class OptLM:
                 if batch_ct >= execute_num_batches: break
             if batch_ct >= execute_num_batches: break
             if i == 0: timers("prefill_total").stop(self.sync)
-
+        localtime = time.asctime(time.localtime(time.time()))
+        print("decoding_gpu_batch stop: " , localtime)
         # Convert "decoding_gpu_batch" timer to "generate" timer
         batch_cost = np.mean(timers("decoding_gpu_batch").costs[10:])
         for i in range(self.execute_gen_len):
