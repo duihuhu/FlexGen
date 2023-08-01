@@ -331,7 +331,6 @@ class SelfAttention:
         if self.policy.compress_cache:
             assert device.device_type != DeviceType.MIXED
             device = device.compressed_device
-        print(device)
         cache = device.init_cache_one_gpu_batch(self.config, self.task, self.policy)
         cache_home.store(cache)
 
@@ -874,6 +873,7 @@ class OptLM:
         for j in range(num_layers):
             for k in range(num_gpu_batches):
                 self.init_cache(j, k)
+        print(self.policy.cpu_cache_compute)
         if self.policy.cpu_cache_compute:
             self.env.cpu.init_attention_compute_workspace(self.config, self.task, self.policy)
 
