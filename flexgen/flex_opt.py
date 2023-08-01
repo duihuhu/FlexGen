@@ -965,17 +965,35 @@ class OptLM:
                 load_weight_timer.stop(self.sync)
 
                 for k in range(self.num_gpu_batches):
+                    if i == 0:
+                        localtime = time.asctime(time.localtime(time.time()))
+                        print("prefill load_cache start :", localtime)
                     load_cache_timer.start(self.sync)
                     self.load_cache(i, j, k)
                     load_cache_timer.stop(self.sync)
+                    if i == 0:
+                        localtime = time.asctime(time.localtime(time.time()))
+                        print("prefill load_cache stop, load_hidden start :", localtime)
                     self.load_hidden(i, j, k)
+                    if i == 0:
+                        localtime = time.asctime(time.localtime(time.time()))
+                        print("prefill load_hidden stop, compute_layer start :", localtime)
                     compute_layer_timer.start(self.sync)
                     self.compute_layer(i, j, k)
                     compute_layer_timer.stop(self.sync)
+                    if i == 0:
+                        localtime = time.asctime(time.localtime(time.time()))
+                        print("prefill compute_layer stop, store_hidden start :", localtime)
                     self.store_hidden(i, j, k)
+                    if i == 0:
+                        localtime = time.asctime(time.localtime(time.time()))
+                        print("prefill store_hidden stop, store_cache start :", localtime)
                     store_cache_timer.start(self.sync)
                     self.store_cache(i, j, k)
                     store_cache_timer.stop(self.sync)
+                    if i == 0:
+                        localtime = time.asctime(time.localtime(time.time()))
+                        print("prefill store_cache stop :", localtime)
 
                 if i > 0:
                     timers("decoding_gpu_batch").stop()
