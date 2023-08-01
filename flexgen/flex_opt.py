@@ -421,7 +421,7 @@ class SelfAttention:
         k_new, v_new = cache_write_buf.pop()
 
         k_pre_home, v_pre_home = prefill_cache_home.val
-        print(k_pre_home)
+
         if i == self.task.gen_len - 1:  # last token, no need to store cache
             return
 
@@ -433,6 +433,9 @@ class SelfAttention:
             indices = (slice(pos - k_new.shape[0], pos),
                        slice(0, k_new.shape[1]))
 
+        if i == 0:
+            general_copy(k_pre_home, indices, k_new, None)
+            general_copy(v_pre_home, indices, v_new, None)
         general_copy(k_home, indices, k_new, None)
         general_copy(v_home, indices, v_new, None)
 
