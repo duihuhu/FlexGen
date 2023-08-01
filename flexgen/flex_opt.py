@@ -420,6 +420,8 @@ class SelfAttention:
         k_home, v_home = cache_home.val
         k_new, v_new = cache_write_buf.pop()
 
+        k_pre_home, v_pre_home = prefill_cache_home.val
+        print(k_pre_home)
         if i == self.task.gen_len - 1:  # last token, no need to store cache
             return
 
