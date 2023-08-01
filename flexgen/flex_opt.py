@@ -331,7 +331,7 @@ class SelfAttention:
         if self.policy.compress_cache:
             assert device.device_type != DeviceType.MIXED
             device = device.compressed_device
-
+        print(device)
         cache = device.init_cache_one_gpu_batch(self.config, self.task, self.policy)
         cache_home.store(cache)
 
@@ -675,7 +675,6 @@ class OptLM:
                     x.delete()
 
     def init_cache(self, j, k):
-        print(self.layers[j])
         self.layers[j].init_cache_one_gpu_batch(self.cache_home[j][k])
 
     def load_cache(self, i, j, k, overlap=True):
