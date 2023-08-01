@@ -338,12 +338,13 @@ class SelfAttention:
             assert device.device_type != DeviceType.MIXED
             device = device.compressed_device
         cache = device.init_cache_one_gpu_batch(self.config, self.task, self.policy)
-        print("cache: ", cache[0].data)
+        # print("cache: ", cache[0].data)
         cache_home.store(cache)
         
     def init_prefill_cache_one_gpu_batch(self, cache_home):
         device = self.env.cpu
         cache = device.init_prefill_cache_one_gpu_batch(self.config, self.task, self.policy)
+        print("cpu cache: ", cache[0].data)
         cache_home.store(cache)
         
 
