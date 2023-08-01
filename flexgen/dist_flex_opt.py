@@ -103,7 +103,6 @@ class DistOptLM(OptLM):
             self.layers[j].load_weight(self.weight_home[j], self.weight_read_buf[j], k)
 
     def init_cache(self, t, j, k):
-        print(self.layers[j])
         self.layers[j].init_cache_one_gpu_batch(self.cache_home[t][j][k])
 
     def load_cache(self, t, i, j, k):

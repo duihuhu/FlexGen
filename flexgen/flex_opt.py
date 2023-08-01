@@ -675,6 +675,7 @@ class OptLM:
                     x.delete()
 
     def init_cache(self, j, k):
+        print(self.layers[j])
         self.layers[j].init_cache_one_gpu_batch(self.cache_home[j][k])
 
     def load_cache(self, i, j, k, overlap=True):
